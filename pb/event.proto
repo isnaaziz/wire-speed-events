@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package events;
+
+option go_package = "github.com/wire-speed-events/gen/events";
+
+message Event {
+  string id = 1;
+  string type = 2;
+  string payload = 3;
+  int64 timestamp = 4;
+}
+
+message ProduceEventResponse {
+  bool success = 1;
+  string error = 2;
+}
