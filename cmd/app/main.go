@@ -27,15 +27,13 @@ func main() {
 
 	consumer := kafka.NewConsumer(cfg)
 	go func() {
-		log.Println("Incoming events...")
 		_ = consumer.Consume(cfg.Topic, func(e *models.Event) error {
-			log.Printf("Consumer received event: [ID=%s, Type=%s, Payload=%s]", e.ID, e.Type, e.Payload)
 			return nil
 		})
 	}()
 
 	log.Println("Simulating high-speed event stream...")
-	for i := 1; i <= 10; i++ {
+	for i := 1; i <= 10000; i++ {
 		event := &models.Event{
 			ID:        time.Now().Format("20060102150405.000"),
 			Type:      "simulation.event",
@@ -46,7 +44,7 @@ func main() {
 		if err := orchestrator.HandleEvent(event); err != nil {
 			log.Printf("Failed to process event %d: %v", i, err)
 		}
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 	}
 
 	log.Println("Simulation completed.")
