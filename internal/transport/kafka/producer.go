@@ -2,11 +2,13 @@ package kafka
 
 import (
 	"context"
-	"encoding/json"
+	"log"
 
 	"github.com/segmentio/kafka-go"
 	"github.com/segmentio/kafka-go/sasl/plain"
+	events "github.com/wire-speed-events/gen/pb"
 	"github.com/wire-speed-events/internal/models"
+	"google.golang.org/protobuf/proto"
 )
 
 type EventProducer struct {
@@ -32,10 +34,19 @@ func NewProducer(cfg Config) *EventProducer {
 }
 
 func (p *EventProducer) Publish(event *models.Event) error {
-	payload, err := json.Marshal(event)
+	protoEvent := &events.Event{
+		Id:        event.ID,
+		Type:      event.Type,
+		Payload:   event.Payload,
+		Timestamp: event.Timestamp.UnixNano(),
+	}
+
+	payload, err := proto.Marshal(protoEvent)
 	if err != nil {
 		return err
 	}
+
+	log.Printf("Publishing binary protobuf: len=%d bytes, hex=%x", len(payload), payload)
 
 	return p.writer.WriteMessages(context.Background(),
 		kafka.Message{
